@@ -23,11 +23,18 @@ def print_studios(studios):
     print(tabulate(table, headers=["ID", "Name", "Location"], tablefmt="fancy_grid"))
 
 def print_movies(movies):
-    if not movies:
-        print("No movies found.")
-        return
-    table = [[m.id, m.title, m.release_year, m.genre, m.director.name, m.studio.name] for m in movies]
-    print(tabulate(table, headers=["ID", "Title", "Year", "Genre", "Director", "Studio"], tablefmt="fancy_grid"))
+    from tabulate import tabulate
+    table = [[
+        m.id,
+        m.title,
+        m.release_year,
+        m.genre,
+        m.director.name if m.director else "N/A",
+        m.studio.name if m.studio else "N/A"
+    ] for m in movies]
+    headers = ["ID", "Title", "Year", "Genre", "Director", "Studio"]
+    print(tabulate(table, headers=headers, tablefmt="fancy_grid"))
+
 
 def add_studio(session):
     print("\n🏢 Add New Studio")
