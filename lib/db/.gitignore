@@ -1,0 +1,18 @@
+# Python bytecode
+__pycache__/
+*.pyc
+
+# SQLite database
+*.db
+
+# Environment files
+.env
+
+# macOS system file
+.DS_Store
+
+# VSCode settings
+.vscode/
+
+# Alembic cache
+alembic/versions/*.pyc
