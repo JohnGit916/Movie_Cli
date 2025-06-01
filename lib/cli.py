@@ -1,13 +1,16 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from datetime import datetime  # ✅ Added for date conversion
-from db.models import Director, Movie
+from datetime import datetime
+
+from db.models import Director, Movie, Studio
 from helpers import (
     print_directors,
     print_movies,
+    print_studios,
     get_valid_int,
     add_movie,
-    delete_movie
+    delete_movie,
+    add_studio
 )
 
 engine = create_engine('sqlite:///lib/db/movies.db')
@@ -19,7 +22,8 @@ def main():
         print("\n🎬 Movie Database CLI 🎬")
         print("1. Manage Directors")
         print("2. Manage Movies")
-        print("3. Exit")
+        print("3. Manage Studios")
+        print("4. Exit")
         choice = input("Choose an option: ").strip()
 
         if choice == '1':
@@ -27,10 +31,12 @@ def main():
         elif choice == '2':
             movie_menu()
         elif choice == '3':
+            studio_menu()
+        elif choice == '4':
             print("Goodbye!")
             break
         else:
-            print("Invalid choice. Please select 1–3.")
+            print("Invalid choice. Please select 1–4.")
 
 def director_menu():
     while True:
@@ -137,6 +143,37 @@ def movie_menu():
             break
         else:
             print("Invalid choice. Please select 1–7.")
+
+def studio_menu():
+    while True:
+        print("\n🏢 Studio Menu")
+        print("1. View All Studios")
+        print("2. Add New Studio")
+        print("3. Delete Studio")
+        print("4. Back to Main Menu")
+        choice = input("Choose an option: ").strip()
+
+        if choice == '1':
+            studios = session.query(Studio).all()
+            print_studios(studios)
+
+        elif choice == '2':
+            add_studio(session)
+
+        elif choice == '3':
+            id = get_valid_int("Enter studio ID to delete: ")
+            studio = session.get(Studio, id)
+            if studio:
+                session.delete(studio)
+                session.commit()
+                print("Studio deleted.")
+            else:
+                print("Studio not found.")
+
+        elif choice == '4':
+            break
+        else:
+            print("Invalid choice. Please select 1–4.")
 
 if __name__ == '__main__':
     main()

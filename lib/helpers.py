@@ -1,9 +1,5 @@
 from tabulate import tabulate
-from db.models import Director, Movie
-
-# ─────────────────────────────────────────────────────
-# ✅ Utility Functions
-# ─────────────────────────────────────────────────────
+from db.models import Director, Movie, Studio
 
 def get_valid_int(prompt):
     while True:
@@ -12,10 +8,6 @@ def get_valid_int(prompt):
         except ValueError:
             print("Please enter a valid number.")
 
-# ─────────────────────────────────────────────────────
-# ✅ Display Functions
-# ─────────────────────────────────────────────────────
-
 def print_directors(directors):
     if not directors:
         print("No directors found.")
@@ -23,16 +15,29 @@ def print_directors(directors):
     table = [[d.id, d.name, d.birthdate] for d in directors]
     print(tabulate(table, headers=["ID", "Name", "Birthdate"], tablefmt="fancy_grid"))
 
+def print_studios(studios):
+    if not studios:
+        print("No studios found.")
+        return
+    table = [[s.id, s.name, s.location] for s in studios]
+    print(tabulate(table, headers=["ID", "Name", "Location"], tablefmt="fancy_grid"))
+
 def print_movies(movies):
     if not movies:
         print("No movies found.")
         return
-    table = [[m.id, m.title, m.release_year, m.genre, m.director.name] for m in movies]
-    print(tabulate(table, headers=["ID", "Title", "Year", "Genre", "Director"], tablefmt="fancy_grid"))
+    table = [[m.id, m.title, m.release_year, m.genre, m.director.name, m.studio.name] for m in movies]
+    print(tabulate(table, headers=["ID", "Title", "Year", "Genre", "Director", "Studio"], tablefmt="fancy_grid"))
 
-# ─────────────────────────────────────────────────────
-# ✅ Movie Functions
-# ─────────────────────────────────────────────────────
+def add_studio(session):
+    print("\n🏢 Add New Studio")
+    name = input("Enter studio name: ").strip()
+    location = input("Enter studio location: ").strip()
+
+    studio = Studio(name=name, location=location)
+    session.add(studio)
+    session.commit()
+    print(f"\n✅ Studio '{name}' added successfully!")
 
 def add_movie(session):
     print("\n🎞️ Add New Movie")
@@ -46,19 +51,28 @@ def add_movie(session):
     if not directors:
         print("No directors found. Please add a director first.")
         return
-
     print_directors(directors)
-
     director_id = get_valid_int("Enter director ID from the list above: ")
     director = session.query(Director).filter_by(id=director_id).first()
 
-    if director:
-        movie = Movie(title=title, release_year=release_year, genre=genre, director=director)
+    print("\n🏢 Available Studios:")
+    studios = session.query(Studio).all()
+    if not studios:
+        print("No studios found. Please add a studio first.")
+        return
+    print_studios(studios)
+    studio_id = get_valid_int("Enter studio ID from the list above: ")
+    studio = session.query(Studio).filter_by(id=studio_id).first()
+
+    if director and studio:
+        movie = Movie(title=title, release_year=release_year, genre=genre,
+                      director=director, studio=studio)
         session.add(movie)
         session.commit()
         print(f"\n✅ Movie '{title}' added successfully!")
     else:
-        print("❌ Director not found. Movie not added.")
+        print("❌ Director or Studio not found. Movie not added.")
+
 def delete_movie(session):
     print("\n❌ Delete Movie")
 
@@ -83,5 +97,3 @@ def delete_movie(session):
             print("Deletion cancelled.")
     else:
         print("❌ Movie not found.")
-
-# Add your other CLI helper functions here as needed
