@@ -3,16 +3,19 @@ from db.models import Director, Movie, Studio
 
 def get_valid_int(prompt):
     while True:
+        val = input(prompt).strip()
+        if val.lower() == 'q':
+            return None
         try:
-            return int(input(prompt))
+            return int(val)
         except ValueError:
-            print("Please enter a valid number.")
+            print("Please enter a valid number or 'q' to go back.")
 
 def print_directors(directors):
     if not directors:
         print("No directors found.")
         return
-    table = [[d.id, d.name, d.birthdate] for d in directors]
+    table = [[d.id, d.name, d.birthdate.strftime('%Y-%m-%d')] for d in directors]
     print(tabulate(table, headers=["ID", "Name", "Birthdate"], tablefmt="fancy_grid"))
 
 def print_studios(studios):
@@ -23,7 +26,6 @@ def print_studios(studios):
     print(tabulate(table, headers=["ID", "Name", "Location"], tablefmt="fancy_grid"))
 
 def print_movies(movies):
-    from tabulate import tabulate
     table = [[
         m.id,
         m.title,
@@ -34,7 +36,6 @@ def print_movies(movies):
     ] for m in movies]
     headers = ["ID", "Title", "Year", "Genre", "Director", "Studio"]
     print(tabulate(table, headers=headers, tablefmt="fancy_grid"))
-
 
 def add_studio(session):
     print("\n🏢 Add New Studio")
@@ -51,6 +52,8 @@ def add_movie(session):
 
     title = input("Enter movie title: ")
     release_year = get_valid_int("Enter release year: ")
+    if release_year is None:
+        return
     genre = input("Enter genre: ")
 
     print("\n🎬 Available Directors:")
@@ -60,6 +63,8 @@ def add_movie(session):
         return
     print_directors(directors)
     director_id = get_valid_int("Enter director ID from the list above: ")
+    if director_id is None:
+        return
     director = session.query(Director).filter_by(id=director_id).first()
 
     print("\n🏢 Available Studios:")
@@ -69,6 +74,8 @@ def add_movie(session):
         return
     print_studios(studios)
     studio_id = get_valid_int("Enter studio ID from the list above: ")
+    if studio_id is None:
+        return
     studio = session.query(Studio).filter_by(id=studio_id).first()
 
     if director and studio:
@@ -92,6 +99,8 @@ def delete_movie(session):
     print_movies(movies)
 
     movie_id = get_valid_int("Enter movie ID to delete: ")
+    if movie_id is None:
+        return
     movie = session.query(Movie).filter_by(id=movie_id).first()
 
     if movie:
